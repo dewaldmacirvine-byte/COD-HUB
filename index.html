@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Macro Command Terminal</title>
+    <style>
+        :root {
+            --bg-main: #0a0d14;
+            --panel-bg: rgba(16, 20, 30, 0.75);
+            --panel-border: rgba(38, 48, 68, 0.6);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-dark: #64748b;
+            
+            /* Cold Institutional Palette */
+            --intel-blue: #00e5ff;
+            --gold-accent: #c5a880;
+            --matrix-green: #10b981;
+            --alarm-red: #ef4444;
+            
+            /* Functional states */
+            --glass-shimmer: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(28, 38, 58, 0.4) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px;
+            letter-spacing: -0.01em;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Tier Structural Navigation */
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        @media(min-width: 768px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            left: -1px; top: 25%; height: 50%; width: 3px;
+            background: var(--gold-accent);
+        }
+
+        .header-title-pack h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .header-title-pack p {
+            margin: 4px 0 0 0;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .branding-badge {
+            color: var(--gold-accent);
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        .system-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .status-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--matrix-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--matrix-green);
+        }
+
+        /* Responsive Matrix Layout */
+        .grid-matrix {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        @media(min-width: 1200px) {
+            .grid-matrix {
+                grid-template-columns: 420px 1fr;
+            }
+            .span-all {
+                grid-column: span 2;
+            }
+        }
+
+        /* High-End Architectural Frameworks */
+        .module {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            background-image: var(--glass-shimmer);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .module-title {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--gold-accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-index {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: var(--text-dark);
+        }
+
+        /* Execution Checklist Aesthetics */
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-row {
+            display: grid;
+            grid-template-columns: 24px 1fr;
+            gap: 16px;
+            align-items: start;
+            padding: 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.02);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .step-row:hover {
+            background: rgba(255,255,255,0.01);
+            border-color: rgba(197, 168, 128, 0.3);
+        }
+
+        .step-row input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--text-dark);
+            border-radius: 2px;
+            margin-top: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .step-row input[type="checkbox"]:checked {
+            background: var(--gold-accent);
+            border-color: var(--gold-accent);
+        }
+
+        .step-row input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: #0a0d14;
+            font-size: 11px;
+            font-weight: bold;
+            left: 3px;
+            top: -1px;
+        }
+
+        .step-meta label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .step-meta span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* Controls & Form Inputs */
+        .input-block {
+            margin-bottom: 16px;
+        }
+
+        .input-block label {
+            display: block;
+            font-size: 0.7rem;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(10, 13, 20, 0.8);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: monospace;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+        }
+
+        /* Output Summary Cards */
+        .metric-readout {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 2px solid var(--gold-accent);
+            border-radius: 0 4px 4px 0;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .readout-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 0.85rem;
+        }
+
+        .readout-value {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--intel-blue);
+        }
+
+        /* Action Buttons */
+        .btn-terminal {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--text-dark);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: not-allowed;
+            transition: all 0.3s;
+            margin-top: 16px;
+        }
+
+        .btn-terminal.armed {
+            background: var(--gold-accent);
+            color: #000;
+            border: 1px solid var(--gold-accent);
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(197, 168, 128, 0.2);
+        }
+
+        .btn-terminal.armed:hover {
+            background: #dbbe95;
+            transform: translateY(-1px);
+        }
+
+        /* Twin Stream Architecture */
+        .twin-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media(min-width: 992px) {
+            .twin-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .widget-frame {
+            height: 380px;
+            border: 1px solid var(--panel-border);
+            background: #000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* Institutional Data Tables */
+        .scroller-table {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px;
+            border-bottom: 2px solid var(--panel-border);
+            background: rgba(0,0,0,0.2);
+        }
+
+        td {
+            padding: 14px 12px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            vertical-align: top;
+        }
+
+        .macro-card {
+            border-left: 2px solid var(--panel-border);
+            padding-left: 10px;
+        }
+        .bullish-node { border-left-color: var(--matrix-green); }
+        .bearish-node { border-left-color: var(--alarm-red); }
+
+        /* Algorithmic Engine Selectors */
+        .engine-dock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 12px 16px;
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .select-native {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid var(--panel-border);
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            font-family: monospace;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .matrix-split {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .matrix-split { grid-template-columns: 1fr 1fr; }
+        }
+
+        .matrix-quadrant {
+            background: rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.02);
+            padding: 16px;
+            border-radius: 4px;
+        }
+
+        .quad-label {
+            font-family: monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .condition-block {
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        /* Chart Core Matrix */
+        .chart-matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .chart-matrix-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .chart-container-block {
+            height: 450px;
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fallback-notice {
+            color: var(--text-dark);
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SYSTEM TOP DECK BAR -->
+    <header>
+        <div class="header-title-pack">
+            <h1>Sovereign Macro Command Terminal</h1>
+            <p>Institutional Execution Interface • COD Algorithmic Framework</p>
+            <div class="branding-badge">CREATED BY MAC'IRVINE MAASDORP • SINCE 2026</div>
+        </div>
+        <div class="system-status">
+            <div class="status-node">
+                <div class="pulse-dot"></div>
+                <span>CORE_ALGO: OPERATIONAL</span>
+            </div>
+            <div class="status-node" style="color: var(--text-dark);">
+                <span>LOC_TZ: SAST (GMT+2)</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid-matrix">
+        
+        <!-- SIDEBAR MODULE 01: COMPLIANCE MATRIX -->
+        <div class="module">
+            <div class="module-header">
+                <h2 class="module-title">01. Compliance Protocol</h2>
+                <span class="module-index">[SYS_GATE_01]</span>
+            </div>
+            <div class="step-container">
+                <div class="step-row" onclick="toggleRow('rule1')">
+                    <input type="checkbox" id="rule1" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>HTF Daily Bias Confirmed</label>
+                        <span>Structural order flow alignment matching higher timeframe structural expansions.</span>
+                    </div>
+                </div>
+                <div class="step-row" onclick="toggleRow('rule2')">
+                    <input type="checkbox" id="rule2" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>4H Liquidity Engine Alignment</label>
+                        <span>Price presence verified within an institutional Point of Interest (OB/FVG).</span>
+                    </div>
+                </div>
+                <div class="step-row" onclick="toggleRow('rule3')">
+                    <input type="checkbox" id="rule3" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>Premium / Discount Verification</label>
+                        <span>Fibonacci optimization check. Matrix confirms entry pricing executes at deep value.</span>
+                    </div>
+                </div>
+                <div class="step-row" onclick="toggleRow('rule4')">
+                    <input type="checkbox" id="rule4" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>DXY Structural Matrix Correlation</label>
+                        <span>Inverse dollar tracking values show zero structural friction relative to target asset.</span>
+                    </div>
+                </div>
+                <div class="step-row" onclick="toggleRow('rule5')">
+                    <input type="checkbox" id="rule5" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>Macro Catalyst Window Clear</label>
+                        <span>Current timeline is outside high-risk impact windows (30m pre / 15m post-release).</span>
+                    </div>
+                </div>
+                <div class="step-row" onclick="toggleRow('rule6')">
+                    <input type="checkbox" id="rule6" class="protocol-check" onclick="event.stopPropagation()">
+                    <div class="step-meta">
+                        <label>LTF Execution Trigger (CHOCH)</label>
+                        <span>Lower timeframe liquidity sweep executed with structural displacement shift.</span>
+                    </div>
+                </div>
+            </div>
+            <button id="gatekeeperButton" class="btn-terminal">Order Route Locked</button>
+        </div>
+
+        <!-- MAIN MODULE 02: RISK SCALING & CALCULATION ENGINE -->
+        <div class="module">
+            <div class="module-header">
+                <h2 class="module-title">02. Capital Allocation Matrix</h2>
+                <span class="module-index">[RISK_SHIELD_02]</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="input-block">
+                    <label>Target Asset Tier</label>
+                    <select id="assetTier" class="input-field">
+                        <option value="OIL">Crude Oil (WTI)</option>
+                        <option value="XAUUSD">Gold (XAUUSD)</option>
+                        <option value="XAGUSD">Silver (XAGUSD)</option>
+                    </select>
+                </div>
+                <div class="input-block">
+                    <label>Liquidity Base (ZAR)</label>
+                    <input type="number" id="capitalBase" class="input-field" value="10000" step="500">
+                </div>
+            </div>
+            <div class="input-block" style="margin-bottom: 0;">
+                <label>Technical Invalidation Width (Pips)</label>
+                <input type="number" id="invalidationWidth" class="input-field" value="30">
+            </div>
+
+            <div class="metric-readout">
+                <div class="readout-line">
+                    <span style="color: var(--text-secondary);">Absolute Institutional Drawdown (2% Ceiling):</span>
+                    <span id="fiatRisk" class="readout-value" style="color: var(--alarm-red);">R 200.00</span>
+                </div>
+                <div class="readout-line" style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px; padding-top: 12px;">
+                    <span style="color: var(--text-primary); font-weight: 500;">Calculated Route Sizing:</span>
+                    <span id="calculatedLot" class="readout-value" style="color: var(--matrix-green); font-size: 1.1rem;">0.07 Lots</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN MODULE 03: LIVE MACRO RADAR STREAM & HISTORIC ROTATIONS -->
+        <div class="module span-all">
+            <div class="module-header">
+                <h2 class="module-title">03. High-Impact Volatility Stream & Macro Rotations</h2>
+                <span class="module-index">[TELEMETRY_03]</span>
+            </div>
+            <div class="twin-layout">
+                <div>
+                    <span class="quad-label" style="color: var(--gold-accent);">📡 Real-Time Global Flow Feed</span>
+                    <div class="widget-frame" id="timeline_parent">
+                        <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                            <div class="tradingview-widget-container__widget" style="height: 100%; width: 100%;"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+                            {
+                                "feedMode": "symbols",
+                                "symbols": [
+                                    ["FX_IDC:DXY|DXY Matrix"],
+                                    ["OANDA:XAUUSD|Gold Spot"],
+                                    ["OANDA:XAGUSD|Silver Spot"],
+                                    ["TVC:USOIL|WTI Crude"]
+                                ],
+                                "isTransparent": true,
+                                "displayMode": "regular",
+                                "width": "100%",
+                                "height": "100%",
+                                "colorTheme": "dark",
+                                "locale": "en"
+                            }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="quad-label" style="color: var(--gold-accent);">📊 Quarterly Institutional Playbooks</span>
+                    <div class="scroller-table" style="height: 380px; border: 1px solid var(--panel-border); border-radius: 4px; background: rgba(0,0,0,0.15);">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Macro Cycle</th>
+                                    <th style="width: 35%;">Volatility Catalyst</th>
+                                    <th style="width: 40%;">Algorithmic Delivery Vector</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Q1 (JAN / FEB)</strong></td>
+                                    <td><div class="macro-card bullish-node"><strong>Opening NFP / Core CPI</strong></div></td>
+                                    <td>Establishes the structural narrative for the fiscal year. Shocks shift cross-asset positioning inside primary DXY liquidity banks.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Q2 (MAR / APR)</strong></td>
+                                    <td><div class="macro-card bearish-node"><strong>Tax Rotations & FOMC</strong></div></td>
+                                    <td>Institutional block rebalancing. Post-winter energy allocations drive localized structure changes across the WTI pricing matrix.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Q2/Q3 (MAY / JUN)</strong></td>
+                                    <td><div class="macro-card bullish-node"><strong>OPEC+ Policy Revisions</strong></div></td>
+                                    <td>Physical market supply anomalies override global indexing trends. High structural premium delivery across WTI platforms.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Q3 (JUL / AUG)</strong></td>
+                                    <td><div class="macro-card bearish-node"><strong>Jackson Hole Forum</strong></div></td>
+                                    <td>Low systemic liquidity windows. High exposure to hunting protocols and aggressive retail stop-clearing maneuvers on Precious Metals.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Q4 (SEP / OCT)</strong></td>
+                                    <td><div class="macro-card bullish-node"><strong>Q3 GDP Adjustments</strong></div></td>
+                                    <td>Full-volume corporate desk re-entry. Generates high-velocity directional breakouts and structural block mitigations.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Q4 (NOV / DEC)</strong></td>
+                                    <td><div class="macro-card bearish-node"><strong>Year-End Balance Runs</strong></div></td>
+                                    <td>Desk closures trigger liquidity extraction phases. Deep retail washouts are common before structural position flattening.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN MODULE 04: ECONOMIC CALENDAR MATRIX ENGINE -->
+        <div class="module span-all">
+            <div class="module-header">
+                <h2 class="module-title">04. Algorithmic Impact Matrix Engine</h2>
+                <span class="module-index">[ENGINE_04]</span>
+            </div>
+            
+            <div class="engine-dock">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 500; margin-right: 12px; color: var(--text-secondary);">Select Target Event Matrix:</span>
+                    <select id="engineSelector" class="select-native">
+                        <option value="nfp">Non-Farm Payrolls (NFP)</option>
+                        <option value="cpi">Consumer Price Index (CPI)</option>
+                        <option value="fomc">FOMC Policy Declarations</option>
+                        <option value="crude">EIA Inventory Adjustments</option>
+                    </select>
+                </div>
+                <div style="font-family: monospace; font-size: 0.7rem; color: var(--intel-blue); letter-spacing: 1px;">
+                    STATUS // INTERPRETATION STATION READY
+                </div>
+            </div>
+
+            <div class="matrix-split" id="engineOutputContainer">
+                <!-- Content injected dynamically via script -->
+            </div>
+        </div>
+
+        <!-- MAIN MODULE 05: TECHNICAL DECK INTERFACE -->
+        <div class="module span-all">
+            <div class="module-header">
+                <h2 class="module-title">05. Multiverse Multi-Chart Station (Technical Tracking)</h2>
+                <span class="module-index">[DECK_05]</span>
+            </div>
+            <div class="chart-matrix-grid">
+                <div class="chart-container-block"><div id="v_gold" style="width:100%; height:100%;"></div></div>
+                <div class="chart-container-block"><div id="v_dxy" style="width:100%; height:100%;"></div></div>
+                <div class="chart-container-block"><div id="v_oil" style="width:100%; height:100%;"></div></div>
+                <div class="chart-container-block"><div id="v_silver" style="width:100%; height:100%;"></div></div>
+            </div>
+        </div>
+
+        <!-- MAIN MODULE 06: COMPLIANCE LOGGING DATA DECK -->
+        <div class="module span-all">
+            <div class="module-header">
+                <h2 class="module-title">06. System Terminal Execution Log</h2>
+                <span class="module-index">[JOURNAL_06]</span>
+            </div>
+            <div class="scroller-table">
+                <table id="logTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Asset Index</th>
+                            <th>Risk Footprint</th>
+                            <th>Target Parameters</th>
+                            <th>Compliance Attestation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody">
+                        <!-- Entries populated programmatically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Institutional TradingView Widget Embedding Dependencies -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        const protocols = document.querySelectorAll('.protocol-check');
+        const gatekeeperButton = document.getElementById('gatekeeperButton');
+        const capitalBaseInput = document.getElementById('capitalBase');
+        const invalidationWidthInput = document.getElementById('invalidationWidth');
+        const assetTierSelect = document.getElementById('assetTier');
+        const fiatRiskSpan = document.getElementById('fiatRisk');
+        const calculatedLotSpan = document.getElementById('calculatedLot');
+        const logBody = document.getElementById('logBody');
+        const engineSelector = document.getElementById('engineSelector');
+        const engineOutputContainer = document.getElementById('engineOutputContainer');
+
+        // Accessible checklist wrapper enhancement
+        function toggleRow(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.checked = !el.checked;
+                el.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // System Gatekeeper Logic
+        protocols.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const compliancePassed = Array.from(protocols).every(c => c.checked);
+                if (compliancePassed) {
+                    gatekeeperButton.disabled = false;
+                    gatekeeperButton.classList.add('armed');
+                    gatekeeperButton.innerText = "Authorize Order Routing";
+                } else {
+                    gatekeeperButton.disabled = true;
+                    gatekeeperButton.classList.remove('armed');
+                    gatekeeperButton.innerText = "Order Route Locked";
+                }
+            });
+        });
+
+        // Precise Mathematical Asset Allocation Formula
+        function computeSystemAllocation() {
+            const baseCapital = parseFloat(capitalBaseInput.value) || 0;
+            const widthPips = parseFloat(invalidationWidthInput.value) || 1;
+            const assetIndex = assetTierSelect.value;
+
+            const absoluteRiskZAR = baseCapital * 0.02;
+            fiatRiskSpan.innerText = `R ${absoluteRiskZAR.toFixed(2)}`;
+
+            let allocationMultiplier = 10; 
+            if (assetIndex === 'OIL') allocationMultiplier = 10; 
+            if (assetIndex === 'XAUUSD') allocationMultiplier = 15;
+            if (assetIndex === 'XAGUSD') allocationMultiplier = 12;
+
+            const standardSizingResult = absoluteRiskZAR / (widthPips * allocationMultiplier);
+            calculatedLotSpan.innerText = `${Math.max(0.01, standardSizingResult).toFixed(2)} Lots`;
+        }
+
+        [capitalBaseInput, invalidationWidthInput, assetTierSelect].forEach(element => {
+            element.addEventListener('input', computeSystemAllocation);
+        });
+
+        // Centralized Algorithmic Matrix Engine Database
+        const engineDatabase = {
+            nfp: {
+                headline: "Non-Farm Payrolls (NFP) Macro Release Model",
+                type: "SYSTEMIC LIQUIDITY ACCELERATOR",
+                bullUSD: "Actual Data > Forecasted Projections (Bullish USD)",
+                bullImpact: "Triggers immediate yield compression across minor assets. Capital runs out of Precious Metals to capture spot Dollar premium. Look for structural order block mitigations underneath Gold premium ranges to find retail distribution liquidations.",
+                bearUSD: "Actual Data < Forecasted Projections (Bearish USD)",
+                bearImpact: "Systemic breakdown of near-term dollar indexing models. Velocity capital flight rotates instantly out of cash reserves into XAUUSD and XAGUSD daily accumulation ranges. Long setups favored upon local displacement structures."
+            },
+            cpi: {
+                headline: "Consumer Price Index (CPI) Inflation Matrix",
+                type: "STRUCTURAL TREND REVERSAL CATALYST",
+                bullUSD: "Core Metrics > Expected Baselines (Bullish USD)",
+                bullImpact: "Re-anchors institutional views toward sustained premium baseline rates. DXY invalidates local bearish structures, forcing severe contraction cycles down the commodity complex. WTI structures show negative correlation if growth metrics panic.",
+                bearUSD: "Core Metrics < Expected Baselines (Bearish USD)",
+                bearImpact: "Proves systemic inflation compression. Heavy dollar distribution patterns emerge. Gold breaks through premium structural barriers into expansion states. Seek discount entry blocks using premium/discount matrix rules."
+            },
+            fomc: {
+                headline: "FOMC Policy & Interest Rate Evaluation Engine",
+                type: "LONG-TERM TREND ANCHOR VECTOR",
+                bullUSD: "Hawkish Stance / Policy Rate Elevation (Bullish USD)",
+                bullImpact: "Forced aggregation of multi-asset capital into the domestic reserve indexing models. Precious metals undergo systemic liquidation routines. WTI Crude collapses on expectations of subsequent industrial contraction.",
+                bearUSD: "Dovish Stance / Policy Rate Mitigation (Bearish USD)",
+                bearImpact: "Devalues yield models for immediate currency holdings. Massive institutional capital rotation patterns filter directly into safe havens and tangible commodity systems. High-displacement structural moves guaranteed."
+            },
+            crude: {
+                headline: "EIA Crude Oil Inventory Divergence Vector",
+                type: "ASSET-SPECIFIC MATRIX SHOCKER",
+                bullUSD: "Inventory Accumulation > Forecast Baseline (Bearish WTI)",
+                bullImpact: "Signals near-term consumer storage saturation or manufacturing demand contraction. WTI Crude experiences sharp distribution metrics. Minimal initial correlation to DXY pricing layers.",
+                bearUSD: "Inventory Drawdown < Forecast Baseline (Bullish WTI)",
+                bearImpact: "Physical market storage constraints confirmed. WTI initiates high-momentum expansion runs. Look for internal 15M/5M fair value gaps to establish safe structural routing coordinates."
+            }
+        };
+
+        function processEngineView() {
+            const activeKey = engineSelector.value;
+            const targetData = engineDatabase[activeKey];
+
+            engineOutputContainer.innerHTML = `
+                <div class="matrix-quadrant" style="grid-column: span 2; border-color: var(--panel-border);">
+                    <span class="quad-label" style="color: var(--intel-blue);">[EVENT_PROFILE] • ${targetData.headline}</span>
+                    <p style="margin: 4px 0 0 0; font-size: 0.8rem; font-family: monospace;">CRITERION ARCHETYPE: <span style="color: var(--gold-accent); font-weight: bold;">${targetData.type}</span></p>
+                </div>
+                <div class="matrix-quadrant">
+                    <span class="quad-label" style="color: var(--matrix-green);">Institutional Vector A (Premium Dollar Flow)</span>
+                    <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px;">${targetData.bullUSD}</div>
+                    <div class="condition-block" style="border-left: 2px solid var(--matrix-green);">${targetData.bullImpact}</div>
+                </div>
+                <div class="matrix-quadrant">
+                    <span class="quad-label" style="color: var(--alarm-red);">Institutional Vector B (Discount Dollar Flow)</span>
+                    <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px;">${targetData.bearUSD}</div>
+                    <div class="condition-block" style="border-left: 2px solid var(--alarm-red);">${targetData.bearImpact}</div>
+                </div>
+            `;
+        }
+
+        engineSelector.addEventListener('change', processEngineView);
+
+        // SAFE Technical Framework Chart Mounting Engine (With Error Handling blocks)
+        function mountTechnicalFrames() {
+            try {
+                if (typeof TradingView === 'undefined') {
+                    displayFallbackCharts("TradingView library blocked by browser shield/ad-blocker.");
+                    return;
+                }
+
+                const frameConfigurations = {
+                    "width": "100%",
+                    "height": "100%",
+                    "interval": "240",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0d14",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": true,
+                    "save_image": false,
+                    "studies": []
+                };
+
+                new TradingView.widget(Object.assign({}, frameConfigurations, {
+                    "container_id": "v_gold",
+                    "symbol": "OANDA:XAUUSD"
+                }));
+
+                new TradingView.widget(Object.assign({}, frameConfigurations, {
+                    "container_id": "v_dxy",
+                    "symbol": "FX_IDC:DXY"
+                }));
+
+                new TradingView.widget(Object.assign({}, frameConfigurations, {
+                    "container_id": "v_oil",
+                    "symbol": "TVC:USOIL"
+                }));
+
+                new TradingView.widget(Object.assign({}, frameConfigurations, {
+                    "container_id": "v_silver",
+                    "symbol": "OANDA:XAGUSD"
+                }));
+            } catch (e) {
+                console.warn("TradingView engine caught restriction: ", e);
+                displayFallbackCharts("Interactive stream restricted by local tracker shield.");
+            }
+        }
+
+        function displayFallbackCharts(message) {
+            const chartIds = ["v_gold", "v_dxy", "v_oil", "v_silver"];
+            const assetNames = { "v_gold": "GOLD (XAUUSD)", "v_dxy": "US DOLLAR INDEX (DXY)", "v_oil": "CRUDE OIL (WTI)", "v_silver": "SILVER (XAGUSD)" };
+            
+            chartIds.forEach(id => {
+                const container = document.getElementById(id);
+                if(container) {
+                    container.innerHTML = `<div class="fallback-notice">⚠️ [${assetNames[id]}] Feed Offline<br><span style="color:var(--text-secondary);font-size:0.7rem;">${message}</span></div>`;
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            processEngineView();
+            setTimeout(mountTechnicalFrames, 300);
+            computeSystemAllocation();
+        });
+
+        // Programmatic Terminal Logging Routine
+        gatekeeperButton.addEventListener('click', () => {
+            if(gatekeeperButton.disabled) return;
+            const currentTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const selectedAsset = assetTierSelect.value;
+            const quantifiedRisk = fiatRiskSpan.innerText;
+            
+            const logRow = document.createElement('tr');
+            logRow.innerHTML = `
+                <td style="font-family: monospace; color: var(--text-secondary);">${currentTimestamp}</td>
+                <td><span style="font-family: monospace; font-weight: 700; color: var(--gold-accent);">${selectedAsset}</span></td>
+                <td style="font-family: monospace; color: var(--intel-blue);">${quantifiedRisk}</td>
+                <td><span style="color: var(--matrix-green); font-family: monospace; font-weight: 600;">Asymmetric R:R 1:3 Authorized</span></td>
+                <td style="font-style: italic; color: var(--text-dark);">Protocol validated. Execution recorded under strict model rules.</td>
+            `;
+            logBody.prepend(logRow);
+            
+            // System Reset Matrix
+            protocols.forEach(checkbox => checkbox.checked = false);
+            gatekeeperButton.disabled = true;
+            gatekeeperButton.classList.remove('armed');
+            gatekeeperButton.innerText = "Order Route Locked";
+        });
+    </script>
+</body>
+</html>
